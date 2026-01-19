@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Aromiq BD</title>
+    <link rel="shortcut icon" href="assets/images/aromiq20bd20logo20-20copy-354x354.png" type="image/x-icon">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .checkout-container { max-width: 1000px; margin: 0 auto; }
+        
+        /* Header */
+        .checkout-header {
+            text-align: center;
+            padding: 15px 0 20px;
+        }
+        .checkout-header img { height: 50px; }
+        .checkout-header h1 {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        /* Main Grid */
+        .checkout-main {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 15px;
+            align-items: start;
+        }
+        @media (max-width: 768px) {
+            .checkout-main { grid-template-columns: 1fr; }
+        }
+        
+        /* Cards */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .card-head {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-head::before { font-size: 16px; }
+        .card-head.user::before { content: '👤'; }
+        .card-head.order::before { content: '🛒'; }
+        
+        /* Form */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+        
+        .field { margin-bottom: 12px; }
+        .field label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .field label .req { color: #e74c3c; }
+        .field label .opt { color: #999; font-weight: 400; }
+        
+        .input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+        .input:focus {
+            border-color: #6c5ce7;
+            background: #fff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.1);
+        }
+        .input::placeholder { color: #bbb; }
+        textarea.input { resize: none; min-height: 60px; }
+        
+        /* Shipping */
+        .shipping-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .ship-opt {
+            position: relative;
+            padding: 12px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            background: #fafafa;
+        }
+        .ship-opt:hover { border-color: #6c5ce7; }
+        .ship-opt.active {
+            border-color: #6c5ce7;
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: #fff;
+        }
+        .ship-opt input { position: absolute; opacity: 0; pointer-events: none; }
+        .ship-opt .loc { font-weight: 700; font-size: 0.8rem; }
+        .ship-opt .cost { font-size: 0.7rem; margin-top: 3px; opacity: 0.8; }
+        
+        /* Order Summary */
+        .items-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+        .items-list::-webkit-scrollbar { width: 3px; }
+        .items-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.8rem;
+        }
+        .order-item:last-child { border: none; }
+        .order-item .name { font-weight: 600; color: #333; }
+        .order-item .meta { font-size: 0.7rem; color: #888; }
+        .order-item .price { font-weight: 700; color: #6c5ce7; }
+        
+        /* Summary Rows */
+        .sum-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .sum-row.total {
+            border-top: 2px solid #1a1a2e;
+            margin-top: 8px;
+            padding-top: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .sum-row.total span:last-child { color: #27ae60; }
+        
+        /* Buttons */
+        .btn-order {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-order:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,211,102,0.4); }
+        
+        .btn-back {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            color: #666;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+        .btn-back:hover { background: #f5f5f5; border-color: #bbb; }
+        
+        .wa-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background: #e8f5e9;
+            color: #25d366;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <img src="assets/images/aromiq20bd20logo20-20copy-354x354.png" alt="Aromiq BD">
+            <h1>Complete Your Order</h1>
+        </div>
+
+        <form id="checkoutForm">
+            <div class="checkout-main">
+                <!-- Customer Info -->
+                <div class="card">
+                    <h3 class="card-head user">Your Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="field">
+                            <label>Full Name <span class="req">*</span></label>
+                            <input type="text" class="input" id="customerName" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="field">
+                            <label>Phone Number <span class="req">*</span></label>
+                            <input type="tel" class="input" id="customerPhone" placeholder="01XXXXXXXXX" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Email <span class="opt">(optional)</span></label>
+                        <input type="email" class="input" id="customerEmail" placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="field">
+                        <label>Delivery Address <span class="req">*</span></label>
+                        <textarea class="input" id="customerAddress" placeholder="House no, Road, Area, City/District" required></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label>Delivery Zone <span class="req">*</span></label>
+                        <div class="shipping-row">
+                            <label class="ship-opt" data-cost="70">
+                                <input type="radio" name="location" value="inside" required>
+                                <div class="loc">📍 Inside Dhaka</div>
+                                <div class="cost">৳70 Shipping</div>
+                            </label>
+                            <label class="ship-opt" data-cost="120">
+                                <input type="radio" name="location" value="outside">
+                                <div class="loc">🚚 Outside Dhaka</div>
+                                <div class="cost">৳120 Shipping</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="card">
+                    <h3 class="card-head order">Order Summary</h3>
+                    
+                    <div class="items-list" id="orderItems"></div>
+
+                    <div class="sum-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">৳0</span>
+                    </div>
+                    <div class="sum-row">
+                        <span>Shipping</span>
+                        <span id="shippingCost">৳0</span>
+                    </div>
+                    <div class="sum-row total">
+                        <span>Total</span>
+                        <span id="totalCost">৳0</span>
+                    </div>
+
+                    <button type="submit" class="btn-order">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                        Order via WhatsApp
+                    </button>
+                    <button type="button" class="btn-back" onclick="window.location.href='index.html'">← Continue Shopping</button>
+                    
+                    <div style="text-align:center">
+                        <span class="wa-badge">🔒 Secure WhatsApp Order</span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="assets/js/cart.js"></script>
+    <script>
+        function loadOrderSummary() {
+            const container = document.getElementById('orderItems');
+            const subtotal = cart.getTotal();
+            
+            if (cart.cart.length === 0) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            container.innerHTML = cart.cart.map(item => `
+                <div class="order-item">
+                    <div>
+                        <div class="name">${item.name}</div>
+                        <div class="meta">${item.size} × ${item.quantity}</div>
+                    </div>
+                    <div class="price">৳${item.price * item.quantity}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('subtotal').textContent = '৳' + subtotal;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const subtotal = cart.getTotal();
+            const selected = document.querySelector('input[name="location"]:checked');
+            const shipping = selected ? parseInt(selected.parentElement.dataset.cost) : 0;
+            
+            document.getElementById('shippingCost').textContent = '৳' + shipping;
+            document.getElementById('totalCost').textContent = '৳' + (subtotal + shipping);
+        }
+
+        document.querySelectorAll('.ship-opt').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.ship-opt').forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                this.querySelector('input').checked = true;
+                updateTotal();
+            });
+        });
+
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+            const email = document.getElementById('customerEmail').value;
+            const address = document.getElementById('customerAddress').value;
+            const location = document.querySelector('input[name="location"]:checked').value;
+            const subtotal = cart.getTotal();
+            const shipping = parseInt(document.querySelector('input[name="location"]:checked').parentElement.dataset.cost);
+            const total = subtotal + shipping;
+
+            let msg = `*🛒 New Order - Aromiq BD*\n\n`;
+            msg += `*👤 Customer:*\n`;
+            msg += `Name: ${name}\nPhone: ${phone}\n`;
+            if (email) msg += `Email: ${email}\n`;
+            msg += `Address: ${address}\n`;
+            msg += `Zone: ${location === 'inside' ? 'Inside Dhaka' : 'Outside Dhaka'}\n\n`;
+            msg += `*📦 Items:*\n`;
+            cart.cart.forEach(item => {
+                msg += `• ${item.name} (${item.size}) ×${item.quantity} = ৳${item.price * item.quantity}\n`;
+            });
+            msg += `\n*💰 Payment:*\n`;
+            msg += `Subtotal: ৳${subtotal}\nShipping: ৳${shipping}\n*Total: ৳${total}*`;
+
+            cart.clearCart();
+            window.open(`https://wa.me/8801641843473?text=${encodeURIComponent(msg)}`, '_blank');
+            setTimeout(() => window.location.href = 'index.html', 1500);
+        });
+
+        loadOrderSummary();
+    </script>
+</body>
+</html>
